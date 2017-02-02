@@ -7,7 +7,7 @@ using NFX.Environment;
 
 using WinSCP;
 
-namespace NFX.IO.FileSystem.SFTP
+namespace NFX.IO.FileSystem.FTP
 {
   public class FTPFileSystem : FileSystem
   {
@@ -18,13 +18,12 @@ namespace NFX.IO.FileSystem.SFTP
     }
 
     public FTPFileSystem(string name, IConfigSectionNode node = null) : base(name, node)
-    {
-    }
+    {}
 
     public override string ComponentCommonName { get { return "fsftp"; } }
 
-    public override IFileSystemCapabilities GeneralCapabilities {  get { throw new NotImplementedException(); } }
-    public override IFileSystemCapabilities InstanceCapabilities { get { throw new NotImplementedException(); } }
+    public override IFileSystemCapabilities GeneralCapabilities  { get { return FTPFileSystemCapabilities.Instance; } }
+    public override IFileSystemCapabilities InstanceCapabilities { get { return FTPFileSystemCapabilities.Instance; } }
 
     protected override FileSystemSessionConnectParams MakeSessionConfigParams(IConfigSectionNode node)
     {
@@ -94,9 +93,17 @@ namespace NFX.IO.FileSystem.SFTP
       var session = directory.Session as FTPFileSystemSession;
       var handle = directory.Handle as Handle;
 
-      var result = session.Connection.EnumerateRemoteFiles(handle.FileInfo.FullName, null, recursive ? EnumerationOptions.AllDirectories : EnumerationOptions.None );
+      IEnumerable<RemoteFileInfo> result;
+      if (recursive)
+        result = session.Connection.EnumerateRemoteFiles(handle.FileInfo.FullName, null, EnumerationOptions.AllDirectories | EnumerationOptions.EnumerateDirectories);
+      else
+      {
+        var dir = session.Connection.ListDirectory(handle.FileInfo.FullName);
+        result = dir.Files;
+      }
+
       foreach (RemoteFileInfo item in result)
-        yield return item.Name;
+        if (!item.IsDirectory) yield return item.FullName;
     }
 
     protected override IEnumerable<string> DoGetSubDirectoryNames(FileSystemDirectory directory, bool recursive)
@@ -104,9 +111,16 @@ namespace NFX.IO.FileSystem.SFTP
       var session = directory.Session as FTPFileSystemSession;
       var handle = directory.Handle as Handle;
 
-      var result = session.Connection.EnumerateRemoteFiles(handle.FileInfo.FullName, null, (recursive ? EnumerationOptions.AllDirectories : EnumerationOptions.None) | EnumerationOptions.EnumerateDirectories);
+      IEnumerable<RemoteFileInfo> result;
+      if (recursive)
+        result = session.Connection.EnumerateRemoteFiles(handle.FileInfo.FullName, null, EnumerationOptions.AllDirectories | EnumerationOptions.EnumerateDirectories);
+      else
+      {
+        var dir = session.Connection.ListDirectory(handle.FileInfo.FullName);
+        result = dir.Files;
+      }
       foreach (RemoteFileInfo item in result)
-        if (item.IsDirectory) yield return item.Name;
+        if (item.IsDirectory && !item.IsParentDirectory && !item.IsThisDirectory) yield return item.FullName;
     }
 
     protected override bool DoRenameItem(FileSystemSessionItem item, string newName)
@@ -127,10 +141,10 @@ namespace NFX.IO.FileSystem.SFTP
       var fileInfo = session.Connection.GetFileInfo(path);
       if (fileInfo.IsDirectory)
         return new FileSystemDirectory(session,
-          fileInfo.FullName.Length == fileInfo.Name.Length ? null : fileInfo.FullName.Substring(0, fileInfo.Name.Length),
+          fileInfo.Name.Length == 0 ? null : fileInfo.FullName.Substring(0, fileInfo.FullName.Length - fileInfo.Name.Length),
           fileInfo.Name, new Handle(fileInfo));
       return new FileSystemFile(ses,
-          fileInfo.FullName.Length == fileInfo.Name.Length ? null : fileInfo.FullName.Substring(0, fileInfo.Name.Length),
+          fileInfo.Name.Length == 0 ? null : fileInfo.FullName.Substring(0, fileInfo.FullName.Length - fileInfo.Name.Length),
           fileInfo.Name, new Handle(fileInfo));
     }
 
@@ -143,22 +157,27 @@ namespace NFX.IO.FileSystem.SFTP
 
     protected override DateTime? DoGetModificationTimestamp(FileSystemSessionItem item) { return (item.Handle as Handle).FileInfo.LastWriteTime; }
 
-    protected override DateTime? DoGetLastAccessTimestamp(FileSystemSessionItem item) { throw new NotImplementedException(); }
+    protected override DateTime? DoGetLastAccessTimestamp(FileSystemSessionItem item) { throw new NotSupportedException("GetLastAccessTimestamp"); }
 
-    protected override DateTime? DoGetCreationTimestamp(FileSystemSessionItem item) { throw new NotImplementedException(); }
+    protected override DateTime? DoGetCreationTimestamp(FileSystemSessionItem item) { throw new NotSupportedException("GetCreationTimestamp"); }
 
-    protected override FileSystemStream DoGetMetadataStream(FileSystemSessionItem item, Action<FileSystemStream> disposeAction) { throw new NotImplementedException(); }
+    protected override FileSystemStream DoGetMetadataStream(FileSystemSessionItem item, Action<FileSystemStream> disposeAction) { throw new NotSupportedException("GetMetadataStream"); }
 
-    protected override FileSystemStream DoGetPermissionsStream(FileSystemSessionItem item, Action<FileSystemStream> disposeAction) { throw new NotImplementedException(); }
+    protected override FileSystemStream DoGetPermissionsStream(FileSystemSessionItem item, Action<FileSystemStream> disposeAction) { throw new NotSupportedException("GetPermissionsStream"); }
 
-    protected override bool DoGetReadOnly(FileSystemSessionItem item) { throw new NotImplementedException(); }
+    protected override bool DoGetReadOnly(FileSystemSessionItem item)
+    {
+      var handle = item.Handle as Handle;
+      var fi = handle.FileInfo;
+      return !fi.FilePermissions.UserWrite;
+    }
 
-    protected override void DoSetReadOnly(FileSystemSessionItem item, bool readOnly) { throw new NotImplementedException(); }
+    protected override void DoSetReadOnly(FileSystemSessionItem item, bool readOnly) { throw new NotSupportedException("SetReadOnly"); }
 
-    protected override void DoSetCreationTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotImplementedException(); }
+    protected override void DoSetCreationTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotSupportedException("SetCreationTimestamp"); }
 
-    protected override void DoSetLastAccessTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotImplementedException(); }
+    protected override void DoSetLastAccessTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotSupportedException("SetLastAccessTimestamp"); }
 
-    protected override void DoSetModificationTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotImplementedException(); }
+    protected override void DoSetModificationTimestamp(FileSystemSessionItem item, DateTime timestamp) { throw new NotSupportedException("SetModificationTimestamp"); }
   }
 }

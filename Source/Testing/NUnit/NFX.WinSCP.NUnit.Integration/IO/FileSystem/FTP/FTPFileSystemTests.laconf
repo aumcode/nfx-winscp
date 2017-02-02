@@ -1,0 +1,38 @@
+﻿nfx
+{
+  starters
+  {
+    starter
+    {
+      name=FileSystems
+      type='NFX.IO.FileSystem.FileSystemStarter, NFX'
+      application-start-break-on-exception=true
+    }
+  }
+
+  file-systems
+  {
+    file-system
+    {
+      name=sftp
+      type='NFX.IO.FileSystem.FTP.FTPFileSystem, NFX.WinSCP'
+      auto-start=true
+      default-session-connect-params
+      {
+        server-url=$(~NFX_FTP_FS_URL)
+        raw-settings
+        {
+          TryAgent=1
+        }
+      }
+    }
+  }
+
+  tests
+  {
+    connect
+    {
+      path=$(~NFX_FTP_FS_PATH)
+    }
+  }
+}

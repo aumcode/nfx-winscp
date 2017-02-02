@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7CC2447F-A61A-4D9C-8EB9-4672F315052D}</ProjectGuid>
+    <ProjectGuid>{7B4C0CF5-1C39-49CF-8EBA-E1B8CA9BCCDF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NFX.WinSCP</RootNamespace>
-    <AssemblyName>NFX.WinSCP</AssemblyName>
+    <RootNamespace>NFX.WinSCP.NUnit.Integration</RootNamespace>
+    <AssemblyName>NFX.WinSCP.NUnit.Integration</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Output\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\Output\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,38 +24,42 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Output\Release\</OutputPath>
+    <OutputPath>..\..\..\..\Output\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\MySql.Data.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\MySql.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX.Erlang, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.Erlang.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.Erlang.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX.MySQL, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.MySQL.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.MySQL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX.Wave, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.Wave.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.Wave.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX.Web, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.Web.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NFX.WinForms, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NFX.3.1.0.1\lib\NFX.WinForms.dll</HintPath>
+      <HintPath>..\..\..\packages\NFX.3.1.0.1\lib\NFX.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.6.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\NUnit.3.6.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -66,24 +70,27 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WinSCPnet">
-      <HintPath>lib\winscp\WinSCPnet.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO\FileSystem\FTP\FTPFileSystem.cs" />
-    <Compile Include="IO\FileSystem\FTP\FTPFileSystemCapabilities.cs" />
-    <Compile Include="IO\FileSystem\FTP\FTPFileSystemSession.cs" />
-    <Compile Include="IO\FileSystem\FTP\FTPFileSystemStream.cs" />
+    <EmbeddedResource Include="IO\FileSystem\FTP\FTPFileSystemTests.laconf">
+      <CustomToolNamespace>NFX.NUnit.Integration.IO.FileSystem.FTP</CustomToolNamespace>
+    </EmbeddedResource>
+    <Compile Include="IO\FileSystem\FTP\FTPFileSystemTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NFX.WinSCP\NFX.WinSCP.csproj">
+      <Project>{7cc2447f-a61a-4d9c-8eb9-4672f315052d}</Project>
+      <Name>NFX.WinSCP</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>xcopy "$(ProjectDir)lib\winscp\WinSCP.exe" "$(TargetDir)"  /E /Y /I /Q /C</PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

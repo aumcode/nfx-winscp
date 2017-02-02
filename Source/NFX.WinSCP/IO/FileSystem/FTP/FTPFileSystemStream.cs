@@ -3,7 +3,7 @@ using System.IO;
 
 using WinSCP;
 
-namespace NFX.IO.FileSystem.SFTP
+namespace NFX.IO.FileSystem.FTP
 {
   internal class FTPFileSystemStream : FileSystemStream
   {
@@ -31,13 +31,19 @@ namespace NFX.IO.FileSystem.SFTP
 
     protected override void Dispose(bool disposing)
     {
-      m_Stream.Close();
+      if (m_Stream != null)
+      {
+        m_Stream.Dispose();
+        m_Stream = null;
+      }
       base.Dispose(disposing);
       if (File.Exists(m_TempFile)) File.Delete(m_TempFile);
     }
 
     protected override void DoFlush()
     {
+      m_Stream.Flush();
+
       var session = Item.Session as FTPFileSystemSession;
       var handle = Item.Handle as FTPFileSystem.Handle;
       var options = new TransferOptions
