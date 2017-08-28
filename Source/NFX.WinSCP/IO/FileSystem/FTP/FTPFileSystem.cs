@@ -103,7 +103,7 @@ namespace NFX.IO.FileSystem.FTP
       }
 
       foreach (RemoteFileInfo item in result)
-        if (!item.IsDirectory) yield return item.FullName;
+        if (!item.IsDirectory) yield return item.Name;
     }
 
     protected override IEnumerable<string> DoGetSubDirectoryNames(FileSystemDirectory directory, bool recursive)
@@ -120,7 +120,7 @@ namespace NFX.IO.FileSystem.FTP
         result = dir.Files;
       }
       foreach (RemoteFileInfo item in result)
-        if (item.IsDirectory && !item.IsParentDirectory && !item.IsThisDirectory) yield return item.FullName;
+        if (item.IsDirectory && !item.IsParentDirectory && !item.IsThisDirectory) yield return item.Name;
     }
 
     protected override bool DoRenameItem(FileSystemSessionItem item, string newName)
