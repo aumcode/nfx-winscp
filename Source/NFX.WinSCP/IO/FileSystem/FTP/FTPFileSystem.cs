@@ -20,6 +20,9 @@ namespace NFX.IO.FileSystem.FTP
     public FTPFileSystem(string name, IConfigSectionNode node = null) : base(name, node)
     {}
 
+
+    [Config] public bool BypassReadonly { get; set; }
+
     public override string ComponentCommonName { get { return "fsftp"; } }
 
     public override IFileSystemCapabilities GeneralCapabilities  { get { return FTPFileSystemCapabilities.Instance; } }
@@ -167,6 +170,8 @@ namespace NFX.IO.FileSystem.FTP
 
     protected override bool DoGetReadOnly(FileSystemSessionItem item)
     {
+      if (BypassReadonly) return false;
+
       var handle = item.Handle as Handle;
       var fi = handle.FileInfo;
       return !fi.FilePermissions.UserWrite;
